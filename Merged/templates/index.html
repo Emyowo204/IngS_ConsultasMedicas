@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Índice</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/horarios.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/cancelar.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/citas.css') }}">
+</head>
+<body>
+    <h1>Indice de Paciente</h1>
+    <ul>
+        <li><a href="/horarios">Horarios por Departamento</a></li>
+        <li><a href="/cancelar_reserva">Cancelar Reserva</a></li>
+        <li><a href="/citas_actuales">Lista de Citas Actuales</a></li>
+    </ul>
+</body>
+</html>

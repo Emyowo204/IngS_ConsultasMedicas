@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Horarios de Atención</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/horario.css') }}">
+</head>
+<body>
+    <h1>Horarios de atención disponible por especialidad</h1>
+
+    <div class="especialidades">
+        {% for departamento, horarios in departments.items() %}
+            <div class="especialidad" onclick="toggleContent(this)">
+                <h2>{{ departamento }}</h2>
+                <div class="contenido">
+                    {% for horario in horarios %}
+                        <p>
+                            {{ horario['nombre'] }} {{ horario['apellido'] }}<br>
+                            Día: {{ horario['dia'] }}<br>
+                            Hora: {{ horario['hora_inicio'] }} - {{ horario['hora_fin'] }}
+                        </p>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <script>
+        function toggleContent(element) {
+            // Cerramos todas las tarjetas que están expandidas
+            document.querySelectorAll('.especialidad.expanded').forEach(expandedElement => {
+                if (expandedElement !== element) {
+                    expandedElement.classList.remove('expanded');
+                }
+            });
+
+            // Alternamos la clase 'expanded' para la tarjeta clickeada
+            element.classList.toggle('expanded');
+        }
+    </script>
+</body>
+</html>

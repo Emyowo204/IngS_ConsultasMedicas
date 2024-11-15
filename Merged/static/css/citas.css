@@ -1,0 +1,63 @@
+body {
+   font-family: 'Roboto', Arial, sans-serif;
+   margin: 20px;
+   background-color: #f4f4f9;
+}
+
+h1 {
+   color: #333;
+   margin-bottom: 20px;
+   text-align: center;
+   position: relative;
+}
+
+h1::after {
+   content: '';
+   display: block;
+   width: 100%;
+   height: 6px;
+   background-color: #007BFF; /* Blue color */
+   position: absolute;
+   bottom: -10px;
+   left: 0;
+}
+
+.confirmada {
+   background-color: #d4edda !important; /* Light green */
+}
+
+.no-confirmada {
+   background-color: #f8d7da !important; /* Light red */
+}
+
+table {
+   width: 100%;
+   table-layout: auto;
+   border-collapse: collapse;
+   margin-bottom: 20px;
+   background-color: #fff;
+   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+table, th, td {
+   border: 1px solid #ccc;
+}
+
+th, td {
+   padding: 15px;
+   text-align: left;
+}
+
+th {
+   background-color: #f8f8f8;
+   color: #555;
+}
+
+tr:nth-child(even) {
+   background-color: #f9f9f9;
+}
+
+tr:hover {
+   background-color: #f1f1f1 !important;
+   cursor: pointer;
+}
