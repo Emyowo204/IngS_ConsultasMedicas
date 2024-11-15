@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Citas</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+    <h1>Lista de Citas</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Fecha</th>
+                <th>Hora de inicio</th>
+                <th>Hora de fin</th>
+                <th>RUT del Médico</th>
+                <th>Nombre</th>
+                <th>Especialidad</th>
+                <th>Estado de la cita</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for cita in citas %}
+            <tr>
+                <td>{{ cita[0] }}</td>
+                <td>{{ cita[1] }}</td>
+                <td>{{ cita[2] }}</td>
+                <td>{{ cita[3] }}</td>
+                <td>{{ cita[4] }}</td>
+                <td>{{ cita[5] }}</td>
+                <td>{{ cita[6] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const rows = document.querySelectorAll('table tbody tr');
+            rows.forEach(row => {
+                const statusCell = row.cells[row.cells.length - 1];
+                console.log(`Status: "${statusCell.textContent.trim()}"`); // Debugging line
+                if (statusCell.textContent.trim() === 'confirmada') {
+                    row.classList.add('confirmada');
+                } else if (statusCell.textContent.trim() === 'no confirmada') {
+                    row.classList.add('no-confirmada');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
