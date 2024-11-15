@@ -1,0 +1,55 @@
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Citas</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+
+
+<body>
+    <h1>Reservas</h1>
+    
+    {% if mensaje %}
+        <p>{{ mensaje }}</p>
+    {% endif %}
+    
+    <table>
+        <thead>
+            <tr>
+                <th>ID reserva</th>
+                <th>Fecha</th>
+                <th>Hora de inicio</th>
+                <th>Hora de fin</th>
+                <th>RUT del Médico</th>
+                <th>Nombre</th>
+                <th>Especialidad</th>
+                <th>Estado de la cita</th>
+                <th>Rut paciente</th>
+                <th>Nombre paciente</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for cita in citas %}
+            <tr>
+                <td>{{ cita[0] }}</td>
+                <td>{{ cita[1] }}</td>
+                <td>{{ cita[2] }}</td>
+                <td>{{ cita[3] }}</td>
+                <td>{{ cita[4] }}</td>
+                <td>{{ cita[5] }}</td>
+                <td>{{ cita[6] }}</td>
+                <td>{{ cita[7] }}</td>
+                <td>{{ cita[8] }}</td>
+                <td>{{ cita[9] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Formulario para ejecutar el query -->
+    <form action="{{ url_for('eliminar_reserva') }}" method="POST">
+        <label for="codigo_reserva">ID Reserva:</label>
+        <input type="number" id="codigo_reserva" name="codigo_reserva" required>
+        <button type="submit">Eliminar Reserva</button>
+    </form>
+</body>
