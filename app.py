@@ -11,7 +11,7 @@ def index():
 
 @app.route('/horarios')
 def horarios():
-    conn = sqlite3.connect('bases de datos//horario.db')
+    conn = sqlite3.connect('bases de datos//clinica.db')
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
     query = """
@@ -48,7 +48,7 @@ def horarios():
 
 @app.route('/cancelar_reserva')
 def cancelar_reserva():
-    conn = sqlite3.connect('bases de datos/cancelar.db')
+    conn = sqlite3.connect('bases de datos/clinica.db')
     cursor = conn.cursor()
 
     query = """
@@ -94,7 +94,7 @@ def cancelar_reserva():
 
 @app.route('/citas_actuales')
 def citas_actuales():
-    conn = sqlite3.connect('bases de datos/citas.db')
+    conn = sqlite3.connect('bases de datos/clinica.db')
     cursor = conn.cursor()
 
     # Adjusted query to match existing columns
