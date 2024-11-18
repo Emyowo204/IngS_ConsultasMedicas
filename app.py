@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 import sqlite3
 import os
 
@@ -47,7 +47,7 @@ def horarios():
 
 
 @app.route('/cancelar_reserva')
-def cancelar_reserva():
+def mostrarcitas():
     conn = sqlite3.connect('bases de datos/clinica.db')
     cursor = conn.cursor()
 
@@ -91,6 +91,45 @@ def cancelar_reserva():
 
     return render_template('cancelar.html', citas=citas)
 
+# Ruta para eliminar la reserva
+@app.route('/eliminar_reserva', methods=['POST'])
+def eliminar_reserva():
+    # Obtener el ID de la reserva desde el formulario
+    codigo_reserva = request.form.get('codigo_reserva')
+
+    conn = sqlite3.connect('bases de datos/clinica.db')
+    cursor = conn.cursor()
+
+    # Ejecutar las tres consultas DELETE
+    try:
+        cursor.execute("""
+        DELETE FROM Cita
+        WHERE codigo_reserva = ?;
+        """, (codigo_reserva,))
+
+        cursor.execute("""
+        DELETE FROM Administrativo_agenda_Reserva
+        WHERE Codigo_reserva = ?;
+        """, (codigo_reserva,))
+
+        cursor.execute("""
+        DELETE FROM Reserva
+        WHERE Codigo_reserva = ?;
+        """, (codigo_reserva,))
+
+        conn.commit()  # Confirmar cambios
+        mensaje = "Reserva eliminada exitosamente."
+
+    except Exception as e:
+        conn.rollback()  # Si hay un error, deshacer cambios
+        mensaje = f"Error al eliminar la reserva: {str(e)}"
+        print(mensaje)
+    
+    finally:
+        conn.close()
+
+    # Redirigir de vuelta a la lista de citas con el mensaje
+    return mostrarcitas()
 
 @app.route('/citas_actuales')
 def citas_actuales():
