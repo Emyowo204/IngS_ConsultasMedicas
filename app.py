@@ -131,6 +131,39 @@ def eliminar_reserva():
     # Redirigir de vuelta a la lista de citas con el mensaje
     return mostrarcitas()
 
+@app.route('/agendar_hora')
+def agendar_hora():
+    conn = sqlite3.connect('bases de datos/clinica.db')
+    cursor = conn.cursor()
+    query = """
+    SELECT p.rut AS rut, p.primer_nombre AS nombre, p.primer_apellido AS apellido
+    FROM Profesional pr
+    JOIN Persona p ON pr.rut_persona = p.rut;
+    """
+    cursor.execute(query)
+    profesionales = cursor.fetchall()
+    conn.close()
+    return render_template('agendar.html', profesionales=profesionales)
+
+@app.route('/agendar', methods=['POST'])
+def agendar():
+    login = request.form['login']
+    rut_profesional = request.form['profesional']
+    fecha = request.form['fecha']
+    hora = request.form['hora']
+
+    conn = sqlite3.connect('bases de datos/clinica.db')
+    cursor = conn.cursor()
+    query = """
+    INSERT INTO Agenda (rut_paciente, rut_profesional, fecha, hora)
+    VALUES (?, ?, ?, ?);
+    """
+    cursor.execute(query, (login, rut_profesional, fecha, hora))
+    conn.commit()
+    conn.close()
+
+    return redirect(url_for('index'))
+
 @app.route('/citas_actuales')
 def citas_actuales():
     conn = sqlite3.connect('bases de datos/clinica.db')

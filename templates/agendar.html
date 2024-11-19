@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agendar Hora</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/agendar.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Agenda una Hora</h1>
+        <form action="/agendar" method="post">
+            <label for="login">Login del Paciente:</label>
+            <input type="text" id="login" name="login" required>
+
+            <label for="profesional">Selecciona un Profesional:</label>
+            <select id="profesional" name="profesional" required>
+                {% for profesional in profesionales %}
+                    <option value="{{ profesional['rut'] }}">{{ profesional['nombre'] }} {{ profesional['apellido'] }}</option>
+                {% endfor %}
+            </select>
+
+            <label for="fecha">Fecha:</label>
+            <input type="date" id="fecha" name="fecha" required>
+
+            <label for="hora">Hora:</label>
+            <input type="time" id="hora" name="hora" required>
+
+            <button type="submit">Agendar</button>
+        </form>
+    </div>
+</body>
+</html>
