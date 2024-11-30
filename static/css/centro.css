@@ -1,0 +1,91 @@
+body {
+    font-family: 'Roboto', Arial, sans-serif;
+    background-color: #f4f4f9;
+    
+ }
+
+ h1 {
+    color: #7794DD;
+    margin-bottom: 5px;
+    text-align: center;
+    position: relative;
+    width: 100%;
+    height: 100px;
+    align-content: center;
+    background-color: #D6E1FD; /* Blue color */
+ }
+
+ h2{
+   color: black;
+   font-size: 1em;
+   width: 100%;
+   height: 100px;
+   text-align: center;
+
+ }
+
+ footer{
+    color: #7794DD;
+    margin-top: 5px;
+    padding-left: 10%;
+    text-align: left;
+    position: relative;
+    width: 90%;
+    height: 100px;
+    align-content: center;
+    background-color: #D6E1FD; /* Blue color */
+
+ }
+
+ div{  
+   margin-top: 20px;
+   margin-bottom: 20px;
+    display: flex;
+    gap: 2%; 
+    justify-content: center;
+ }
+
+ .tarjetas {
+    margin-top: 20px;
+    margin-bottom: 10px;
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+ }
+ 
+ .tarjeta {
+    text-decoration: none;
+    border: 1px solid #ccc;
+    padding: 20px;
+    text-align: center;
+    width: 150px;
+    border-radius: 10px;
+    background-color: #f9f9f9;
+    color: black;
+    font-size: 16px;
+    transition: background-color 0.3s;
+  }
+
+  .tarjeta:hover {
+    background-color: #e0e0e0;
+  }
+
+  input {
+   font-size: 1em;
+   border: 1px solid #ccc;
+   border-radius: 20px; /* Bordes redondeados */
+   padding: 10px;
+   width: 50%;
+   box-sizing: border-box;
+}
+
+form {
+   display: flex;
+   align-items: center; /* Alinea el botón con el input */
+   justify-content: center;
+   gap: 10px; /* Espacio entre el input y el botón */
+   width: 100%;
+   margin-top: 10px;
+   margin-bottom: 20px;
+}
+

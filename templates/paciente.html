@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Horarios de Atención</title>
+    <link rel="stylesheet" href="../static/css/centro.css">
+</head>
+<body>
+    <h1>Centro de Acciones</h1>
+
+    <div>
+        <img src="../images/stockmedico.jpg" alt="Imagen 1" width="200">
+        <img src="../images/stockmedico.jpg" alt="Imagen 2" width="200">
+        <img src="../images/stockmedico.jpg" alt="Imagen 3" width="200">
+    </div>
+
+    <div class="tarjetas">
+        <a href="agendar.html" class="tarjeta">Agenda</a>
+        <a href="cancelar.html" class="tarjeta">Cancelar</a>
+        <a href="horario.html" class="tarjeta">Ver Horarios</a>
+    </div>
+    
+    <div>
+        <form action="/procesar_rut" method="post" class="input">
+            <label for="rut">INGRESE SU RUT:</label>
+            <input type="text" id="rut" name="rut" placeholder="Ej: 12345678-9" required>
+        </form>
+    </div>
+
+    <footer>
+        Contáctanos: +56 9 75312580<br>
+        Made by: TEAM10
+    </footer>
+</body>
+</html>
+
