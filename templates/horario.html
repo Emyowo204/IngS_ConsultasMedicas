@@ -4,10 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Horarios de Atención</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/horario.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/centro.css') }}">
 </head>
 <body>
     <h1>Horarios de atención disponible por especialidad</h1>
+    <div class ="images">
+        <img src="{{ url_for('static', filename='images/stockmedico.jpg') }}" alt="Imagen 1" width="200">
+        <img src="{{ url_for('static', filename='images/stockmedico.jpg') }}" alt="Imagen 1" width="200">
+        <img src="{{ url_for('static', filename='images/stockmedico.jpg') }}" alt="Imagen 1" width="200">
+    </div>
+
 
     <div class="especialidades">
         {% for departamento, horarios in departments.items() %}
@@ -39,5 +45,11 @@
             element.classList.toggle('expanded');
         }
     </script>
+
+
+<footer>
+    Contáctanos: +56 9 75312580<br>
+    Made by: TEAM10
+</footer>
 </body>
 </html>

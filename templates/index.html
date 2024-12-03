@@ -4,18 +4,146 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Índice</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/horarios.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/cancelar.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/citas.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/agendar.css') }}">
+    <a href="/consola_administrativos" >login trabajadores</a>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/centro.css') }}">
+    <link rel="stylesheet" href="../static/css/centro.css">
+    
+
+
 </head>
 <body>
-    <h1>Indice de Paciente</h1>
-    <ul>
-        <li><a href="/horarios">Horarios por Departamento</a></li>
-        <li><a href="/cancelar_reserva">Cancelar Reserva</a></li>
-        <li><a href="/citas_actuales">Lista de Reservas Actuales</a></li>  
-        <li><a href="/agendar_hora">Agendar Cita</a></li>
-    </ul>
+    
+    <h1>Centro Medico</h1>
+    <div class ="images">
+        <img src="{{ url_for('static', filename='images/stockmedico.jpg') }}" alt="Imagen 1" width="200">
+        <img src="{{ url_for('static', filename='images/stockmedico.jpg') }}" alt="Imagen 1" width="200">
+        <img src="{{ url_for('static', filename='images/stockmedico.jpg') }}" alt="Imagen 1" width="200">
+    </div>
+
+
+    <div class="tarjetas">
+        <button onclick="openModal()" class="tarjeta">Profesionales</button>
+        <button onclick="openDepartmentsModal()" class="tarjeta">Departamentos</button>
+        <a href="/pacientes" class="tarjeta">Atención Paciente</a>
+    </div>
+
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2>Lista de Profesionales</h2>
+            <ul></ul>
+        </div>
+    </div>
+
+    <div id="departmentsModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeDepartmentsModal()">&times;</span>
+            <h2>Lista de Departamentos</h2>
+            <ul></ul>
+        </div>
+    </div>
+    
+    
+    <footer>
+        Contáctanos: +56 9 75312580<br>
+        Made by: TEAM10
+    </footer>
+
+
+
+    <script>
+        async function openModal() {
+            // Elementos del modal
+            const modal = document.getElementById('myModal');
+            const modalContent = document.querySelector('.modal-content ul');
+    
+            // Limpia cualquier contenido previo
+            modalContent.innerHTML = '';
+    
+            try {
+                // Obtén los datos del backend
+                const response = await fetch('/api/profesionales');
+                if (!response.ok) throw new Error('Error al obtener los profesionales');
+                
+                const profesionales = await response.json();
+                
+                // Agrega los profesionales al modal
+                profesionales.forEach(prof => {
+                    const li = document.createElement('li');
+                    li.textContent = `${prof.nombre} - ${prof.titulo} (${prof.departamento})`;
+                    modalContent.appendChild(li);
+                });
+            } catch (error) {
+                console.error(error);
+                const errorItem = document.createElement('li');
+                errorItem.textContent = 'Error al cargar los datos.';
+                modalContent.appendChild(errorItem);
+            }
+    
+            // Muestra el modal
+            modal.style.display = 'block';
+        }
+    
+        function closeModal() {
+            document.getElementById('myModal').style.display = 'none';
+        }
+    
+        // Cierra el modal si se hace clic fuera
+        window.onclick = function(event) {
+            const modal = document.getElementById('myModal');
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        };
+    </script>
+    
+    <script>
+        async function openDepartmentsModal() {
+            // Elementos del modal
+            const modal = document.getElementById('departmentsModal');
+            const modalContent = document.querySelector('#departmentsModal .modal-content ul');
+    
+            // Limpia cualquier contenido previo
+            modalContent.innerHTML = '';
+    
+            try {
+                // Obtén los datos del backend
+                const response = await fetch('/api/departamentos');
+                if (!response.ok) throw new Error('Error al obtener los departamentos');
+                
+                const departamentos = await response.json();
+                
+                // Agrega los departamentos al modal
+                departamentos.forEach(depto => {
+                    const li = document.createElement('li');
+                    li.textContent = `${depto.nombre} (ID: ${depto.id})`;
+                    modalContent.appendChild(li);
+                });
+            } catch (error) {
+                console.error(error);
+                const errorItem = document.createElement('li');
+                errorItem.textContent = 'Error al cargar los datos.';
+                modalContent.appendChild(errorItem);
+            }
+    
+            // Muestra el modal
+            modal.style.display = 'block';
+        }
+    
+        function closeDepartmentsModal() {
+            document.getElementById('departmentsModal').style.display = 'none';
+        }
+    
+        // Cierra el modal si se hace clic fuera
+        window.onclick = function(event) {
+            const modal = document.getElementById('departmentsModal');
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        };
+    </script>
+    
+
+
 </body>
 </html>

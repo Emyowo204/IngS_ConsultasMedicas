@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, jsonify, render_template, request
 import sqlite3
 import os
 
@@ -8,6 +8,75 @@ app = Flask(__name__)
 @app.route('/')
 def index():
     return render_template('index.html')
+
+@app.route('/pacientes')
+def centro_de_acciones():
+    return render_template('paciente.html')
+
+@app.route('/login')
+def login():
+    return render_template('login.html')
+
+@app.route('/api/profesionales', methods=['GET'])
+def obtener_profesionales():
+    connection = sqlite3.connect('bases de datos//clinica.db')
+    cursor = connection.cursor()
+    try:
+        # Consulta para obtener los datos de profesionales
+        query = """
+            SELECT 
+                p.primer_nombre, p.segundo_nombre, p.primer_apellido, p.segundo_apellido, 
+                t.titulo, d.nombre_departamento
+            FROM 
+                Profesional prof
+            JOIN Persona p ON prof.rut_persona = p.rut
+            JOIN Titulos_disponibles t ON prof.titulo = t.titulo
+            JOIN Departamento d ON prof.ID_Depto = d.ID_Depto;
+        """
+        cursor.execute(query)
+        resultados = cursor.fetchall()
+        
+        # Estructurar los datos como JSON
+        profesionales = [
+            {
+                'nombre': f"{fila[0]} {fila[1] or ''} {fila[2]} {fila[3] or ''}".strip(),
+                'titulo': fila[4],
+                'departamento': fila[5]
+            }
+            for fila in resultados
+        ]
+        return jsonify(profesionales)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    finally:
+        cursor.close()
+        connection.close()
+
+
+@app.route('/api/departamentos', methods=['GET'])
+def obtener_departamentos():
+    connection = sqlite3.connect('bases de datos//clinica.db')
+    cursor = connection.cursor()
+    try:
+        # Consulta para obtener los departamentos
+        query = """
+            SELECT ID_Depto, nombre_departamento
+            FROM Departamento;
+        """
+        cursor.execute(query)
+        resultados = cursor.fetchall()
+        
+        # Estructurar los datos como JSON
+        departamentos = [
+            {'id': fila[0], 'nombre': fila[1]} for fila in resultados
+        ]
+        return jsonify(departamentos)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    finally:
+        cursor.close()
+        connection.close()
+
 
 @app.route('/horarios')
 def horarios():
@@ -170,6 +239,143 @@ def citas_actuales():
     conn.close()
 
     return render_template('citas.html', citas=citas)
+
+@app.route('/consola_administrativos')
+def consola_administrativos():
+    conn = sqlite3.connect('bases de datos/clinica.db')
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT rut, primer_nombre || ' ' || primer_apellido AS nombre FROM Persona WHERE rut IN (SELECT rut_persona FROM Profesional)")
+    medicos = cursor.fetchall()
+    print("Medicos:", medicos)  # Línea de depuración
+
+    cursor.execute("SELECT rut, primer_nombre || ' ' || primer_apellido AS nombre FROM Persona WHERE rut IN (SELECT rut FROM Paciente)")
+    pacientes = cursor.fetchall()
+    print("Pacientes:", pacientes)  # Línea de depuración
+
+    cursor.close()
+    conn.close()
+
+    administrativo_nombre = "Juan Pérez"  # Nombre del administrativo predeterminado
+    return render_template('consola_administrativos.html', medicos=medicos, pacientes=pacientes, administrativo_nombre=administrativo_nombre)
+
+@app.route('/dias_disponibles')
+def dias_disponibles():
+    medico = request.args.get('medico')
+    print("Medico seleccionado:", medico)  # Línea de depuración
+    conn = sqlite3.connect('bases de datos/clinica.db')
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT DISTINCT Dia_a_trabajar FROM Agenda WHERE Rut_p = ?", (medico,))
+    dias = [row[0] for row in cursor.fetchall()]
+    print("Días disponibles:", dias)  # Línea de depuración
+
+    cursor.close()
+    conn.close()
+    return jsonify(dias=dias)
+
+@app.route('/horas_disponibles')
+def horas_disponibles():
+    medico = request.args.get('medico')
+    dia = request.args.get('dia')
+    print("Medico seleccionado:", medico)  # Línea de depuración
+    print("Día seleccionado:", dia)  # Línea de depuración
+    conn = sqlite3.connect('bases de datos/clinica.db')
+    cursor = conn.cursor()
+
+    # Paso 1: Verificar los datos en la tabla Agenda
+    cursor.execute("SELECT * FROM Agenda WHERE Rut_p = ? AND Dia_a_trabajar = ?", (medico, dia))
+    agenda_data = cursor.fetchall()
+    print("Datos de Agenda:", agenda_data)  # Línea de depuración
+
+    # Paso 2: Verificar los datos en la tabla Bloque_esta_en_agenda
+    cursor.execute("""
+    SELECT BEA.* FROM Bloque_esta_en_agenda BEA
+    JOIN Agenda A ON BEA.codigo_agenda = A.codigo_agenda
+    WHERE A.Rut_p = ? AND A.Dia_a_trabajar = ?
+    """, (medico, dia))
+    bloque_data = cursor.fetchall()
+    print("Datos de Bloque_esta_en_agenda:", bloque_data)  # Línea de depuración
+
+    # Paso 3: Verificar los datos en la tabla Bloque_Horario
+    cursor.execute("""
+    SELECT B.* FROM Bloque_Horario B
+    JOIN Bloque_esta_en_agenda BEA ON B.Numero_bloque = BEA.Bloque
+    JOIN Agenda A ON BEA.codigo_agenda = A.codigo_agenda
+    WHERE A.Rut_p = ? AND A.Dia_a_trabajar = ?
+    """, (medico, dia))
+    horario_data = cursor.fetchall()
+    print("Datos de Bloque_Horario:", horario_data)  # Línea de depuración
+
+    # Paso 4: Verificar los datos en la tabla Reserva
+    cursor.execute("""
+    SELECT R.* FROM Reserva R
+    JOIN Bloque_esta_en_agenda BEA ON R.codigo_agenda = BEA.codigo_agenda AND R.Bloque = BEA.Bloque
+    JOIN Agenda A ON BEA.codigo_agenda = A.codigo_agenda
+    WHERE A.Rut_p = ? AND A.Dia_a_trabajar = ?
+    """, (medico, dia))
+    reserva_data = cursor.fetchall()
+    print("Datos de Reserva:", reserva_data)  # Línea de depuración
+
+    # Consulta original
+    query = """
+    SELECT B.Hora_inicio || ' - ' || B.Hora_fin AS hora
+    FROM Agenda A
+    JOIN Bloque_esta_en_agenda BEA ON A.codigo_agenda = BEA.codigo_agenda
+    JOIN Bloque_Horario B ON BEA.Bloque = B.Numero_bloque
+    LEFT JOIN Reserva R ON BEA.codigo_agenda = R.codigo_agenda AND BEA.Bloque = R.Bloque
+    WHERE A.Rut_p = ? AND A.Dia_a_trabajar = ? AND (R.Codigo_reserva IS NULL OR R.estado_reserva != 'confirmada')
+    ORDER BY B.Hora_inicio
+    """
+    cursor.execute(query, (medico, dia))
+    horas = [row[0] for row in cursor.fetchall()]
+    print("Horas disponibles:", horas)  # Línea de depuración
+
+    cursor.close()
+    conn.close()
+    return jsonify(horas=horas)
+
+@app.route('/reservar_cita', methods=['POST'])
+def reservar_cita():
+    medico = request.form.get('medico')
+    paciente = request.form.get('paciente')
+    dia = request.form.get('dia')
+    hora = request.form.get('hora')
+    print("Datos de la reserva - Medico:", medico, "Paciente:", paciente, "Día:", dia, "Hora:", hora)  # Línea de depuración
+
+    conn = sqlite3.connect('bases de datos/clinica.db')
+    cursor = conn.cursor()
+
+    # Obtener el bloque y agenda correspondientes
+    cursor.execute("""
+    SELECT BEA.Bloque, A.codigo_agenda
+    FROM Agenda A
+    JOIN Bloque_esta_en_agenda BEA ON A.codigo_agenda = BEA.codigo_agenda
+    JOIN Bloque_Horario B ON BEA.Bloque = B.Numero_bloque
+    WHERE A.Rut_p = ? AND A.Dia_a_trabajar = ? AND B.Hora_inicio || ' - ' || B.Hora_fin = ?
+    """, (medico, dia, hora))
+    bloque, codigo_agenda = cursor.fetchone()
+    print("Bloque y código de agenda obtenidos:", bloque, codigo_agenda)  # Línea de depuración
+
+    # Insertar la reserva
+    cursor.execute("""
+    INSERT INTO Reserva (Bloque, codigo_agenda, estado_reserva, rut)
+    VALUES (?, ?, 'no confirmada', ?)
+    """, (bloque, codigo_agenda, paciente))
+    codigo_reserva = cursor.lastrowid
+    print("Código de reserva generado:", codigo_reserva)  # Línea de depuración
+
+    # Insertar en Administrativo_agenda_Reserva
+    cursor.execute("""
+    INSERT INTO Administrativo_agenda_Reserva (rut_persona, Codigo_reserva)
+    VALUES ('11111111-1', ?)
+    """, (codigo_reserva,))  # Administrativo predeterminado
+
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+    return "Reserva realizada exitosamente"
 
 
 if __name__ == '__main__':

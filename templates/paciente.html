@@ -9,22 +9,25 @@
 <body>
     <h1>Centro de Acciones</h1>
 
-    <div>
-        <img src="../images/stockmedico.jpg" alt="Imagen 1" width="200">
-        <img src="../images/stockmedico.jpg" alt="Imagen 2" width="200">
-        <img src="../images/stockmedico.jpg" alt="Imagen 3" width="200">
+    <div class = "images">
+        <img src="{{ url_for('static', filename='images/stockmedico.jpg') }}" alt="Imagen 1" width="200">
+        <img src="{{ url_for('static', filename='images/stockmedico.jpg') }}" alt="Imagen 1" width="200">
+        <img src="{{ url_for('static', filename='images/stockmedico.jpg') }}" alt="Imagen 1" width="200">
     </div>
 
     <div class="tarjetas">
-        <a href="agendar.html" class="tarjeta">Agenda</a>
-        <a href="cancelar.html" class="tarjeta">Cancelar</a>
-        <a href="horario.html" class="tarjeta">Ver Horarios</a>
+        <a href="agendar.html" class="tarjeta">Agendar</a>
+        <a href="/citas_actuales" class="tarjeta">Mis Citas</a>
+        <a href="cancelar.html" class="tarjeta">Cancelar Cita</a>
+
+        <a href="/horarios" class="tarjeta">Ver Horarios</a>
     </div>
     
     <div>
-        <form action="/procesar_rut" method="post" class="input">
+        <form action="/citas_actuales" method="get" class="input">
             <label for="rut">INGRESE SU RUT:</label>
             <input type="text" id="rut" name="rut" placeholder="Ej: 12345678-9" required>
+            <button type="submit">Ver Citas Actuales</button>
         </form>
     </div>
 

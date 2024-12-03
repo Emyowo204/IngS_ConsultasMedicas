@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consola Administrativos</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/consola_administrativos.css') }}">
+</head>
+<body>
+    <h1>Hola, {{ administrativo_nombre }}</h1>
+    <form id="reserva-form" method="POST" action="{{ url_for('reservar_cita') }}">
+        <label for="medico">Seleccionar Médico:</label>
+        <select id="medico" name="medico" required>
+            <option value="" disabled selected>Seleccione un médico</option>
+            {% for medico in medicos %}
+                <option value="{{ medico[0] }}">{{ medico[1] }}</option>
+            {% endfor %}
+        </select>
+
+        <label for="paciente">Seleccionar Paciente:</label>
+        <select id="paciente" name="paciente" required>
+            <option value="" disabled selected>Seleccione un paciente</option>
+            {% for paciente in pacientes %}
+                <option value="{{ paciente[0] }}">{{ paciente[1] }}</option>
+            {% endfor %}
+        </select>
+
+        <label for="dia">Seleccionar Día:</label>
+        <select id="dia" name="dia" required>
+            <!-- Options will be populated dynamically based on selected medico -->
+        </select>
+
+        <label for="hora">Seleccionar Hora:</label>
+        <select id="hora" name="hora" required>
+            <!-- Options will be populated dynamically based on selected dia -->
+        </select>
+
+        <button type="submit">Reservar Cita</button>
+    </form>
+
+    <script>
+        document.getElementById('medico').addEventListener('change', function() {
+            const medico = this.value;
+            if (medico) {
+                fetch(`/dias_disponibles?medico=${medico}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const diaSelect = document.getElementById('dia');
+                        diaSelect.innerHTML = '';
+                        data.dias.forEach(dia => {
+                            const option = document.createElement('option');
+                            option.value = dia;
+                            option.textContent = dia;
+                            diaSelect.appendChild(option);
+                        });
+                    });
+            }
+        });
+    
+        document.getElementById('dia').addEventListener('change', function() {
+            const medico = document.getElementById('medico').value;
+            const dia = this.value;
+            if (medico && dia) {
+                fetch(`/horas_disponibles?medico=${medico}&dia=${dia}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const horaSelect = document.getElementById('hora');
+                        horaSelect.innerHTML = '';
+                        data.horas.forEach(hora => {
+                            const option = document.createElement('option');
+                            option.value = hora;
+                            option.textContent = hora;
+                            horaSelect.appendChild(option);
+                        });
+                    });
+            }
+        });
+    </script>
+</body>
+</html>

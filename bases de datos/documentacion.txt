@@ -1,0 +1,356 @@
+Creación de la bdd
+-- Tabla Persona
+CREATE TABLE Persona (
+    rut VARCHAR(20) PRIMARY KEY,
+    primer_nombre VARCHAR(50) NOT NULL,
+    segundo_nombre VARCHAR(50),
+    primer_apellido VARCHAR(50) NOT NULL,
+    segundo_apellido VARCHAR(50),
+    fecha_nacimiento DATE NOT NULL
+);
+
+-- Tabla Departamento
+CREATE TABLE Departamento (
+    ID_Depto VARCHAR(100) PRIMARY KEY,
+    nombre_departamento VARCHAR(100)
+);
+
+-- Tabla Cuenta
+CREATE TABLE Cuenta (
+    usuario VARCHAR(50) PRIMARY KEY,
+    password VARCHAR(100) NOT NULL,
+    correo VARCHAR(100) NOT NULL,
+    telefono VARCHAR(15),
+    rut_persona VARCHAR(20) UNIQUE,
+    FOREIGN KEY (rut_persona) REFERENCES Persona(rut)
+);
+
+-- Tabla Titulos_disponibles
+CREATE TABLE Titulos_disponibles (
+    titulo VARCHAR(100) PRIMARY KEY
+);
+
+-- Tabla Profesional
+CREATE TABLE Profesional (
+    rut_persona VARCHAR(20) PRIMARY KEY,
+    titulo VARCHAR(100),
+    ID_Depto VARCHAR(100),
+    FOREIGN KEY (rut_persona) REFERENCES Persona(rut),
+    FOREIGN KEY (titulo) REFERENCES Titulos_disponibles(titulo),
+    FOREIGN KEY (ID_Depto) REFERENCES Departamento(ID_Depto)
+);
+
+
+-- Tabla Administrativo
+CREATE TABLE Administrativo (
+    rut_persona VARCHAR(20) PRIMARY KEY,
+    Cargo VARCHAR(20),
+    FOREIGN KEY (rut_persona) REFERENCES Persona(rut)
+);
+
+
+-- Tabla Paciente
+CREATE TABLE Paciente (
+    rut VARCHAR(20) PRIMARY KEY,
+    FOREIGN KEY (rut) REFERENCES Persona(rut)
+);
+
+-- Tabla Bloque_Horario
+CREATE TABLE Bloque_Horario (
+    Numero_bloque INT PRIMARY KEY,
+    Hora_inicio TIME NOT NULL,
+    Hora_fin TIME NOT NULL,
+    CHECK (Hora_inicio < Hora_fin)
+);
+
+-- Tabla Agenda
+CREATE TABLE Agenda (
+    codigo_agenda INT PRIMARY KEY,
+    Dia_a_trabajar DATE NOT NULL,
+    Rut_p VARCHAR(20),
+    FOREIGN KEY (Rut_p) REFERENCES Profesional(rut_persona)
+);
+
+-- Tabla Ficha_Clinica
+CREATE TABLE Ficha_Clinica (
+    codigo_fc INT PRIMARY KEY,
+    rut VARCHAR(20),
+    Falta_de_citas INT,
+    FOREIGN KEY (rut) REFERENCES Paciente(rut)
+);
+
+
+
+-- Tabla Bloque_esta_en_agenda
+CREATE TABLE Bloque_esta_en_agenda (
+    Bloque INT,
+    codigo_agenda INT,
+    PRIMARY KEY (Bloque, codigo_agenda),
+    FOREIGN KEY (Bloque) REFERENCES Bloque_Horario(Numero_bloque),
+    FOREIGN KEY (codigo_agenda) REFERENCES Agenda(codigo_agenda)
+);
+
+
+
+-- Tabla Reserva
+CREATE TABLE Reserva (
+    Codigo_reserva INT PRIMARY KEY,
+    Bloque INT NOT NULL,
+    codigo_agenda INT NOT NULL,
+    estado_reserva VARCHAR(50) DEFAULT 'no confirmada',
+    rut VARCHAR(20),
+    FOREIGN KEY (rut) REFERENCES Persona(rut),
+    FOREIGN KEY (Bloque, codigo_agenda) REFERENCES Bloque_esta_en_agenda(Bloque, codigo_agenda)
+);
+-- Tabla Administrativo_agenda_Reserva
+CREATE TABLE Administrativo_agenda_Reserva (
+    rut_persona VARCHAR(20),
+    Codigo_reserva INT,
+    PRIMARY KEY (rut_persona, Codigo_reserva),
+    FOREIGN KEY (rut_persona) REFERENCES Administrativo(rut_persona),
+    FOREIGN KEY (Codigo_reserva) REFERENCES Reserva(Codigo_reserva)
+);
+
+-- Tabla Cita
+CREATE TABLE Cita (
+    ID_Cita INT PRIMARY KEY,
+    codigo_reserva INT,
+    codigo_fc INT,
+    FOREIGN KEY (codigo_reserva) REFERENCES Reserva(Codigo_reserva),
+    FOREIGN KEY (codigo_fc) REFERENCES Ficha_Clinica(codigo_fc)
+);
+
+-- Tabla Registro_medico
+CREATE TABLE Registro_medico (
+    Codigo_RM INT PRIMARY KEY,
+    Documentacion TEXT,
+    ID_Cita INT,
+    FOREIGN KEY (ID_Cita) REFERENCES Cita(ID_Cita)
+);
+-- Tabla Ficha_presenta_Registro
+CREATE TABLE Ficha_presenta_diagnostico (
+    codigo_fc INT,
+    Codigo_RM INT,
+    PRIMARY KEY (codigo_fc, Codigo_RM),
+    FOREIGN KEY (codigo_fc) REFERENCES Ficha_Clinica(codigo_fc),
+    FOREIGN KEY (Codigo_RM) REFERENCES Registro_medico(Codigo_RM)
+);
+
+Eliminación de datos
+(reset)
+
+-- Eliminar datos de las tablas dependientes
+DELETE FROM Ficha_presenta_diagnostico;
+DELETE FROM Registro_medico;
+DELETE FROM Cita;
+DELETE FROM Administrativo_agenda_Reserva;
+DELETE FROM Reserva;
+DELETE FROM Bloque_esta_en_agenda;
+DELETE FROM Ficha_Clinica;
+DELETE FROM Agenda;
+
+-- Eliminar datos de tablas relacionadas con entidades
+DELETE FROM Paciente;
+DELETE FROM Administrativo;
+DELETE FROM Profesional;
+DELETE FROM Cuenta;
+
+-- Eliminar datos de tablas maestras
+DELETE FROM Bloque_Horario;
+DELETE FROM Titulos_disponibles;
+DELETE FROM Departamento;
+DELETE FROM Persona;
+Población de bdd
+-- Poblar la tabla Departamento
+INSERT INTO Departamento (ID_Depto, nombre_departamento)
+VALUES
+('DEP001', 'Cardiología'),
+('DEP002', 'Neurología'),
+('DEP003', 'Medicina Interna'),
+('DEP004', 'Pediatría');
+
+-- Poblar la tabla Titulos_disponibles
+INSERT INTO Titulos_disponibles (titulo)
+VALUES
+('Doctor en Medicina'),
+('Especialista en Medicina Interna'),
+('Especialista en Neurología Pediátrica'),
+('Máster en Neurología Clínica');
+
+-- Poblar la tabla Persona
+INSERT INTO Persona (rut, primer_nombre, segundo_nombre, primer_apellido, segundo_apellido, fecha_nacimiento)
+VALUES
+('11111111-1', 'Juan', 'Carlos', 'Pérez', 'López', '1980-05-12'),
+('22222222-2', 'María', 'Fernanda', 'Gómez', 'Ramírez', '1990-03-08'),
+('33333333-3', 'Pedro', 'Luis', 'Hernández', 'Martínez', '1985-10-22'),
+('44444444-4', 'Ana', 'Sofía', 'García', 'Castro', '1992-07-15');
+
+-- Poblar la tabla Cuenta
+INSERT INTO Cuenta (usuario, password, correo, telefono, rut_persona)
+VALUES
+('jcperez', 'password123', 'juan.perez@mail.com', '123456789', '11111111-1'),
+('mfgomez', 'password456', 'maria.gomez@mail.com', '987654321', '22222222-2'),
+('plhernandez', 'password789', 'pedro.hernandez@mail.com', '456789123', '33333333-3'),
+('asgarcia', 'password321', 'ana.garcia@mail.com', '789123456', '44444444-4');
+
+-- Poblar la tabla Profesional
+INSERT INTO Profesional (rut_persona, titulo, ID_Depto)
+VALUES
+('11111111-1', 'Doctor en Medicina', 'DEP001'),
+('22222222-2', 'Especialista en Neurología Pediátrica', 'DEP002'),
+('33333333-3', 'Especialista en Medicina Interna', 'DEP003'),
+('44444444-4', 'Máster en Neurología Clínica', 'DEP004');
+
+-- Poblar la tabla Administrativo
+INSERT INTO Administrativo (rut_persona, Cargo) 
+VALUES 
+('11111111-1', 'Recepción'), 
+('22222222-2', 'Coord. Agenda');
+-- Poblar la tabla Paciente
+INSERT INTO Paciente (rut)
+VALUES
+('33333333-3'),
+('44444444-4');
+
+-- Poblar la tabla Bloque_Horario
+INSERT INTO Bloque_Horario (Numero_bloque, Hora_inicio, Hora_fin)
+VALUES
+(1, '08:00:00', '09:00:00'),
+(2, '09:00:00', '10:00:00'),
+(3, '10:00:00', '11:00:00'),
+(4, '11:00:00', '12:00:00'),
+(5, '12:00:00', '13:00:00'),
+(6, '13:00:00', '14:00:00'),
+(7, '14:00:00', '15:00:00'),
+(8, '15:00:00', '16:00:00'),
+(9, '16:00:00', '17:00:00');
+
+
+-- Poblar la tabla Agenda
+INSERT INTO Agenda (codigo_agenda, Dia_a_trabajar, Rut_p)
+VALUES
+(101, '2024-11-12', '11111111-1'),
+(102, '2024-11-13', '22222222-2');
+
+-- Poblar la tabla Ficha_Clinica
+INSERT INTO Ficha_Clinica (codigo_fc, rut, Falta_de_citas)
+VALUES
+(1001, '33333333-3', 2),
+(1002, '44444444-4', 0);
+
+-- Poblar la tabla Bloque_esta_en_agenda
+INSERT INTO Bloque_esta_en_agenda (Bloque, codigo_agenda)
+VALUES
+(1, 101),
+(2, 102);
+
+-- Poblar la tabla Reserva
+INSERT INTO Reserva (Codigo_reserva, Bloque, codigo_agenda, estado_reserva, rut)
+VALUES
+(1, 1, 101, 'confirmada', '33333333-3'),
+(2, 2, 102, 'no confirmada', '44444444-4');
+
+-- Poblar la tabla Administrativo_agenda_Reserva
+INSERT INTO Administrativo_agenda_Reserva (rut_persona, Codigo_reserva)
+VALUES
+('22222222-2', 1),
+('11111111-1', 2);
+
+-- Poblar la tabla Cita
+INSERT INTO Cita (ID_Cita, codigo_reserva, codigo_fc)
+VALUES
+(1, 1, 1001),
+(2, 2, 1002);
+
+-- Poblar la tabla Registro_medico
+INSERT INTO Registro_medico (Codigo_RM, Documentacion, ID_Cita)
+VALUES
+(10001, 'Diagnóstico inicial: Hipertensión', 1),
+(10002, 'Diagnóstico inicial: Migraña crónica', 2);
+
+-- Poblar la tabla Ficha_presenta_diagnostico
+INSERT INTO Ficha_presenta_diagnostico (codigo_fc, Codigo_RM)
+VALUES
+(1001, 10001),
+(1002, 10002);
+Consultas habituales
+Consultar los días de trabajo y horas de un médico específico
+SELECT 
+    A.Dia_a_trabajar, 
+    B.Hora_inicio, 
+    B.Hora_fin
+FROM 
+    Agenda A
+JOIN 
+    Bloque_esta_en_agenda BEA ON A.codigo_agenda = BEA.codigo_agenda
+JOIN 
+    Bloque_Horario B ON BEA.Bloque = B.Numero_bloque
+WHERE 
+    A.Rut_p = '11111111-1'  -- Aquí reemplazas '11111111-1'  con el rut del médico
+ORDER BY 
+    A.Dia_a_trabajar, 
+    B.Hora_inicio;
+Consultar solo los días de trabajo de un médico específico (sin las horas)
+SELECT 
+    DISTINCT A.Dia_a_trabajar
+FROM 
+    Agenda A
+WHERE 
+    A.Rut_p = '11111111-1'  -- Aquí reemplazas '11111111-1'  con el rut del médico
+ORDER BY 
+    A.Dia_a_trabajar;
+Consultar los bloques de horas y días de trabajo con estado de reserva para un médico
+SELECT 
+    A.Dia_a_trabajar, 
+    B.Hora_inicio, 
+    B.Hora_fin, 
+    R.estado_reserva
+FROM 
+    Agenda A
+JOIN 
+    Bloque_esta_en_agenda BEA ON A.codigo_agenda = BEA.codigo_agenda
+JOIN 
+    Bloque_Horario B ON BEA.Bloque = B.Numero_bloque
+LEFT JOIN 
+    Reserva R ON BEA.codigo_agenda = R.codigo_agenda AND BEA.Bloque = R.Bloque
+WHERE 
+    A.Rut_p ='11111111-1'  -- Aquí reemplazas '11111111-1'  con el rut del médico
+ORDER BY 
+    A.Dia_a_trabajar, 
+    B.Hora_inicio;
+Consultar los bloques de horas en los que un médico no tiene reservas
+SELECT 
+    A.Dia_a_trabajar, 
+    B.Hora_inicio, 
+    B.Hora_fin
+FROM 
+    Agenda A
+JOIN 
+    Bloque_esta_en_agenda BEA ON A.codigo_agenda = BEA.codigo_agenda
+JOIN 
+    Bloque_Horario B ON BEA.Bloque = B.Numero_bloque
+LEFT JOIN 
+    Reserva R ON BEA.codigo_agenda = R.codigo_agenda AND BEA.Bloque = R.Bloque
+WHERE 
+    A.Rut_p = '11111111-1'  -- Aquí reemplazas '11111111-1'  con el rut del médico
+    AND R.Codigo_reserva IS NULL  -- Solo muestra los bloques sin reservas
+ORDER BY 
+    A.Dia_a_trabajar, 
+    B.Hora_inicio;
+Ingreso de nuevos datos
+INSERT INTO Agenda (codigo_agenda, Dia_a_trabajar, Rut_p) VALUES 
+(103, '2024-11-15', '33333333-3'); -- Agenda para el profesional con rut 33333333-3
+
+Una vez que se agreguen en agenda y existan los bloques se puede ejecutar el comnado de este tipo, lo que marca como disponible (de manera logica) para reservar dentro de la base de datos
+INSERT INTO Bloque_esta_en_agenda (Bloque, codigo_agenda) 
+VALUES 
+(10, 103), -- Bloque 10 en la agenda 
+103 (11, 103); -- Bloque 11 en la agenda 103
+Cuando ya estén los pasos anteriores listos recién se puede reservar
+INSERT INTO Reserva (Codigo_reserva, Bloque, codigo_agenda, estado_reserva, rut)
+VALUES
+(3, 10, 103, 'no confirmada', '44444444-4');  -- Reserva en el bloque 10 para el paciente con rut 44444444-4
+Extra: Si después decides confirmar la reserva, puedes actualizar el estado de la reserva.
+UPDATE Reserva
+SET estado_reserva = 'confirmada'
+WHERE Codigo_reserva = 3;  -- Confirmando la reserva con código 3
