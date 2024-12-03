@@ -1,8 +1,9 @@
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, jsonify, render_template, request,redirect, url_for,flash,session
 import sqlite3
 import os
 
 app = Flask(__name__)
+app.secret_key = 'clave_secreta_para_sesiones'
 
 # Definir las rutas para cada página
 @app.route('/')
@@ -13,8 +14,30 @@ def index():
 def centro_de_acciones():
     return render_template('paciente.html')
 
-@app.route('/login')
+@app.route('/login', methods=['GET', 'POST'])
 def login():
+    if request.method == 'POST':
+        # Capturar los datos del formulario
+        usuario = request.form['usuario']
+        password = request.form['password']
+
+        # Conectar a la base de datos
+        conn = sqlite3.connect('bases de datos/clinica.db')
+        cursor = conn.cursor()
+
+        # Consultar si el usuario y contraseña coinciden
+        query = "SELECT * FROM Cuenta WHERE usuario = ? AND password = ?"
+        cursor.execute(query, (usuario, password))
+        cuenta = cursor.fetchone()
+        conn.close()
+
+        if cuenta:  # Si existe la cuenta
+            session['usuario'] = usuario  # Guardar al usuario en la sesión
+            flash('Inicio de sesión exitoso', 'success')
+            return redirect(url_for('consola_administrativos'))
+        else:  # Si no coincide la cuenta
+            flash('Usuario o contraseña incorrectos', 'danger')
+
     return render_template('login.html')
 
 @app.route('/api/profesionales', methods=['GET'])
