@@ -14,6 +14,10 @@ def index():
 def centro_de_acciones():
     return render_template('paciente.html')
 
+@app.route('/admin')
+def admin():
+    return render_template('index_admin.html')
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -34,7 +38,7 @@ def login():
         if cuenta:  # Si existe la cuenta
             session['usuario'] = usuario  # Guardar al usuario en la sesión
             flash('Inicio de sesión exitoso', 'success')
-            return redirect(url_for('consola_administrativos'))
+            return redirect('/admin')
         else:  # Si no coincide la cuenta
             flash('Usuario o contraseña incorrectos', 'danger')
 
@@ -399,6 +403,69 @@ def reservar_cita():
     conn.close()
 
     return "Reserva realizada exitosamente"
+
+# Ruta para mostrar el formulario de login
+@app.route('/login_profesional', methods=['GET','POST'])
+def login_profesional():
+    if request.method == 'POST':
+        rut = request.form['rut']
+        password = request.form['password']
+        
+        query = """
+            SELECT * 
+            FROM Cuenta 
+            WHERE rut_persona = ? AND password = ?
+        """
+        params = (rut, password)
+
+        conn = sqlite3.connect('bases de datos/clinica.db')
+        cuenta = conn.execute(query, params).fetchone()
+        conn.close()
+
+        if cuenta is None:
+            flash('RUT o Contraseña incorrecta', 'error')
+            return redirect(url_for('login_profesional'))
+        else:
+            return redirect(url_for('mostrar_citas', rut_medico=rut))
+
+    return render_template('login_profesional.html')
+
+@app.route('/citas_medico')
+def mostrar_citas():
+    rut_medico = request.args.get('rut_medico')
+    
+    query = """
+        SELECT 
+            Agenda.dia_a_trabajar AS fecha,
+            Bloque_Horario.hora_inicio AS hora_inicio,
+            Bloque_Horario.hora_fin AS hora_fin,
+            Profesional.rut_persona AS rut_medico,
+            Persona.primer_nombre || ' ' || Persona.primer_apellido AS nombre_medico,
+            Titulos_disponibles.titulo AS titulo_medico,
+            Reserva.estado_reserva AS estado_reserva
+        FROM Agenda
+        JOIN Bloque_esta_en_agenda ON Agenda.codigo_agenda = Bloque_esta_en_agenda.codigo_agenda
+        JOIN Bloque_Horario ON Bloque_esta_en_agenda.bloque = Bloque_Horario.numero_bloque
+        LEFT JOIN Reserva ON Bloque_esta_en_agenda.codigo_agenda = Reserva.codigo_agenda
+                          AND Bloque_esta_en_agenda.bloque = Reserva.bloque
+        LEFT JOIN Profesional ON Agenda.rut_p = Profesional.rut_persona
+        LEFT JOIN Persona ON Profesional.rut_persona = Persona.rut
+        LEFT JOIN Titulos_disponibles ON Profesional.titulo = Titulos_disponibles.titulo
+    """
+    
+    if rut_medico:
+        query += " WHERE Profesional.rut_persona = ?"
+        params = (rut_medico,)
+    else:
+        params = ()
+
+    query += " ORDER BY Agenda.dia_a_trabajar, Bloque_Horario.hora_inicio"
+
+    conn = sqlite3.connect('bases de datos/clinica.db')
+    results = conn.execute(query, params).fetchall()
+    conn.close()
+
+    return render_template('citas.html', results=results)
 
 
 if __name__ == '__main__':
